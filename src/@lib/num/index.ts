@@ -1,0 +1,75 @@
+const suffixes = [
+  "K",
+  "M",
+  "B",
+  "T",
+  "Qa",
+  "Qt",
+  "Sx",
+  "Sp",
+  "Oc",
+  "Nn",
+  "Dc",
+  "UDc",
+  "DDc",
+  "TDc",
+  "QaDc",
+  "QtDc",
+  "SxDc",
+  "SpDc",
+  "ODc",
+  "NDc",
+  "Vi",
+  "UVi",
+  "DVi",
+  "TVi",
+  "QaVi",
+  "QtVi",
+  "SxVi",
+  "SpVi",
+  "OcVi",
+  "NnVi",
+  "Tg",
+  "UTg",
+  "DTg",
+  "TTg",
+  "QaTg",
+  "QtTg",
+  "SxTg",
+  "SpTg",
+  "OcTg",
+  "NnTg",
+  "Qd",
+  "UQd",
+  "DQd",
+  "TQd",
+  "QaQd",
+  "QtQd",
+  "SxQd",
+  "SpQd",
+  "OcQd",
+  "NnQd",
+  "Qq",
+  "UQq",
+  "DQq",
+  "TQq",
+  "QaQq",
+  "QtQq",
+  "SxQq",
+  "SpQq",
+  "OcQq",
+  "NnQq",
+  "Sg",
+];
+
+function displayNum(num: number, sciNotation = false) {
+  if (sciNotation) return Math.abs(num) < 100000 ? num : num.toPrecision(5);
+
+  for (let i = suffixes.length - 1; i >= 0; i--) {
+    if (Math.abs(num) >= Math.pow(10, 3 * i + 3) * 0.99999) {
+      return (num / Math.pow(10, 3 * i + 3)).toFixed(2) + suffixes[i];
+    }
+  }
+
+  return num;
+}
