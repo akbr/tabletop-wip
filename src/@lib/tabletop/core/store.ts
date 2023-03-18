@@ -8,7 +8,7 @@ export type StoreUpdate<S extends Spec> = {
   prevBoard: S["board"];
   action?: PlayerAction<S>;
   patches: Partial<S["board"]>[];
-  final: boolean;
+  final?: boolean;
 };
 
 export type History<S extends Spec> = {
@@ -23,19 +23,17 @@ export type GameStore<S extends Spec> = {
 };
 
 export type InputCtx<S extends Spec> = {
-  numPlayers: number;
+  numPlayers?: number;
   options?: Ctx<S>["options"];
   seed?: Ctx<S>["seed"];
 };
 
 export function createGameStore<S extends Spec>(
   game: Game<S>,
-  initCtx: InputCtx<S>
+  initCtx?: InputCtx<S>
 ): GameStore<S> {
-  const ctx = validateContext(game, initCtx);
-
+  const ctx = validateContext(game, initCtx || {});
   const initialBoard = game.getInitialBoard(ctx);
-
   const initialUpdate = game.reducer(initialBoard, ctx);
 
   if (is.string(initialUpdate)) {
@@ -93,9 +91,16 @@ function validateContext<S extends Spec>(
   ctx: InputCtx<S>
 ): Ctx<S> {
   const [min, max] = game.meta.players;
-  const numPlayers =
-    ctx.numPlayers < min ? min : ctx.numPlayers > max ? max : ctx.numPlayers;
-  const options = game.getOptions(ctx.numPlayers, ctx.options);
+
+  const numPlayers = (() => {
+    if (ctx.numPlayers === undefined) return min;
+    if (ctx.numPlayers < min) return min;
+    if (ctx.numPlayers > max) return max;
+    return ctx.numPlayers;
+  })();
+
+  const options = game.getOptions(numPlayers, ctx.options);
+
   return {
     numPlayers,
     seed: ctx.seed ? ctx.seed : `auto_${Date.now()}`,

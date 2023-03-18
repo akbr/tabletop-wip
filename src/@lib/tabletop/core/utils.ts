@@ -1,6 +1,6 @@
 import type { Spec } from "./spec";
 import type { Ctx, Game } from "./game";
-import type { History } from "./store";
+import type { StoreUpdate, History } from "./store";
 import { is } from "@lib/compare";
 
 export function applyPatches<S extends Spec>(
@@ -8,15 +8,24 @@ export function applyPatches<S extends Spec>(
   patches: Partial<S["board"]>[]
 ) {
   const boards: S["board"][] = [];
-  patches.forEach((patch, idx) => {
-    const prior = boards[idx - 1] || prev;
+  patches.forEach((patch) => {
+    const prior = boards.at(-1) || prev;
     boards.push({ ...prior, ...patch });
   });
   return boards;
 }
 
-export function getCtx<S extends Spec>(game: Game<S>, seed = ""): Ctx<S> {
-  const numPlayers = game.meta.players[0];
+export function getBoards<S extends Spec>(update: StoreUpdate<S>) {
+  const boards = applyPatches(update.prevBoard, update.patches);
+  if (update.idx === 0) boards.unshift(update.prevBoard);
+  return boards;
+}
+
+export function getCtx<S extends Spec>(
+  game: Game<S>,
+  numPlayers = game.meta.players[0],
+  seed = ""
+): Ctx<S> {
   const options = game.getOptions(numPlayers);
   return { numPlayers, options, seed };
 }
